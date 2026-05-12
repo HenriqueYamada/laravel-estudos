@@ -25,9 +25,18 @@ class SeriesController extends Controller
 
     public function store(SeriesFormRequest $request)
     {
-        $request->validate([
-            'nome' => ['required', 'min:3']
-        ]);
+        for ($i = 1; $i < $request->seasonQty; $i++) {
+            $serie->seasons()->create([
+                'number' => $i,
+            ]);
+
+            for ($j=  1; $j < $request->episodesPerSeason; $j++) { 
+               $serie->seasons()->create([
+                    'number' => $j,
+                ]);
+            }
+        }
+
         $serie = Serie::create($request->all());
 
         return to_route('series.index')
