@@ -22,11 +22,8 @@ class SeriesController extends Controller
     }
 
     public function store(Request $request) {
-        $nomeSerie = $request->input('nome');
-        $serie = new Serie();
-        $serie->nome = $nomeSerie;
-        $serie->save();
+        Serie::create($request->all()); //aqui será feito um mass assignment, onde ele pega todos os campos automaticamente e enviar para '/series', para que não seja preciso digitar tudo manualmente
 
-        return redirect('/series');
+        return to_route('series.index');
     }
 }

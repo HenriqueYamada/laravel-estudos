@@ -1,7 +1,7 @@
 {{-- O Blade facilita os nosos códigos na view, deixando-os simples de entender --}}
 
 <x-layout title="Nova Série">
-    <a href="/series/criar" class="btn btn-dark mb-2">Adicionar nova série</a>
+    <a href="{{ route('series.create') }}" class="btn btn-dark mb-2">Adicionar nova série</a>
 
     <ul class="list-group">
         @foreach ($series as $serie)
