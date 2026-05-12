@@ -1,29 +1,55 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\DB;
-use App\Models\Serie;
 
+use App\Http\Requests\SeriesFormRequest;
+use App\Models\Serie;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SeriesController extends Controller
 {
-
-    public function index() {
-        //return redirect(to: 'https://google.com'); //ao colocar na url /series, a página será redirecionada para o site da google
-
+    public function index(Request $request)
+    {
         $series = Serie::query()->orderBy('nome')->get();
+        $mensagemSucesso = session('mensagem.sucesso');
 
-        return view('series.index', compact('series'));  // função do Laravel que nos permite ir à pasta view e retornar como reposta uma string, que está no arquivo listar-series.php, tendo como segundo parâmetro 'series' que tem o valor (=>) o array $series
-    }       
-
-    public function create() {
-        return view('/series.create');
+        return view('series.index')->with('series', $series)
+            ->with('mensagemSucesso', $mensagemSucesso);
     }
 
-    public function store(Request $request) {
-        Serie::create($request->all()); //aqui será feito um mass assignment, onde ele pega todos os campos automaticamente e enviar para '/series', para que não seja preciso digitar tudo manualmente
+    public function create()
+    {
+        return view('series.create');
+    }
 
-        return to_route('series.index');
+    public function store(SeriesFormRequest $request)
+    {
+        $serie = Serie::create($request->all());
+
+        return to_route('series.index')
+            ->with('mensagem.sucesso', "Série '{$serie->nome}' adicionada com sucesso");
+    }
+
+    public function destroy(Serie $series)
+    {
+        $series->delete();
+
+        return to_route('series.index')
+            ->with('mensagem.sucesso', "Série '{$series->nome}' removida com sucesso");
+    }
+
+    public function edit(Serie $series)
+    {
+        return view('series.edit')->with('serie', $series);
+    }
+
+    public function update(Serie $series, SeriesFormRequest $request)
+    {
+        $series->fill($request->all());
+        $series->save();
+
+        return to_route('series.index')
+            ->with('mensagem.sucesso', "Série '{$series->nome}' atualizada com sucesso");
     }
 }
