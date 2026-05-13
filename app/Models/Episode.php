@@ -10,6 +10,6 @@ class Episode extends Model
     protected $fillable = ['number'];
 
     public function season() {
-        return $this->belongsTo(Season::class)
+        return $this->belongsTo(Season::class);
     }
 }
