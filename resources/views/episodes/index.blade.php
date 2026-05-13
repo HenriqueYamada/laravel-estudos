@@ -2,6 +2,12 @@
     <form method="post">
         @csrf
 
+        @isset($mensagemSucesso)
+        <div class="alert alert-success">
+            {{ $mensagemSucesso }}
+        </div>
+        @endisset
+
         <ul class="list-group">
             @foreach ($episodes as $episode)
                 <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -11,7 +17,10 @@
                         Episódio {{ $episode->number }}
                     </span>
 
-                    <input type="checkbox" name="episodes[]" value="{{ $episode->id }}">
+                    <input type="checkbox" 
+                    name="episodes[]" 
+                    value="{{ $episode->id }}"
+                    @if ($episode->watched) checked @endif>
                 </li>
             @endforeach
         </ul>
