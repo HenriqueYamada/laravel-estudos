@@ -2,29 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Series extends Model
 {
-    protected $with = ['seasons']; 
-    protected $fillable = ['nome']; // com isso, você diz quais campos serão permitidos para fazer essa atribuição em massa, que poderia ser nome, qntd_ep, tempo, etc...
+    use HasFactory;
+    protected $fillable = ['nome'];
 
-    //é uma lista de permissões (whitelist) definida no Model, indicando quais campos da tabela do banco de dados podem ser preenchidos automaticamente via atribuição em massa (mass assignment)
-
-
-    public function seasons() 
+    public function seasons()
     {
         return $this->hasMany(Season::class, 'series_id');
-    } 
+    }
 
-    protected static function booted() {
+    protected static function booted()
+    {
         self::addGlobalScope('ordered', function (Builder $queryBuilder) {
             $queryBuilder->orderBy('nome');
         });
     }
-
-    /*public function scopeActive(Builder $query) {
-        return $query->where('active', true)
-    }*/
 }

@@ -3,59 +3,40 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SeriesFormRequest;
-use App\Models\Episode;
-use App\Models\Season;
 use App\Models\Series;
+use App\Repositories\SeriesRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class SeriesController extends Controller
 {
-    public function index() {
-        //return redirect(to: 'https://google.com'); //ao colocar na url /series, a página será redirecionada para o site da google
+    public function __construct(private SeriesRepository $repository) {
 
-        $series = Series::query()->orderBy('nome')->get();
+    }
 
-        return view('series.index', compact('series'));  // função do Laravel que nos permite ir à pasta view e retornar como reposta uma string, que está no arquivo listar-series.php, tendo como segundo parâmetro 'series' que tem o valor (=>) o array $series
-    }       
+    public function index(Request $request)
+    {
+        $series = Series::all();
+        $mensagemSucesso = session('mensagem.sucesso');
 
-    public function create() {
-        return view('/series.create');
+        return view('series.index')->with('series', $series)
+            ->with('mensagemSucesso', $mensagemSucesso);
+    }
 
+    public function create()
+    {
+        return view('series.create');
     }
 
     public function store(SeriesFormRequest $request)
     {
-        $serie = DB::transaction(function () use ($request) {
-            $serie = Series::create($request->all());
-            $seasons = [];
-            for ($i = 1; $i <= $request->seasonsQty; $i++) {
-                $seasons[] = [
-                    'series_id' => $serie->id,
-                    'number' => $i,
-                ];
-            }
-            Season::insert($seasons);
-
-            $episodes = [];
-            foreach ($serie->seasons as $season) {
-                for ($j = 1; $j <= $request->episodesPerSeason; $j++) {
-                    $episodes[] = [
-                        'season_id' => $season->id,
-                        'number' => $j
-                    ];
-                }
-            }
-            Episode::insert($episodes);
-
-            return $serie;
-        });
+        $serie = $this->repository->add($request);
 
         return to_route('series.index')
             ->with('mensagem.sucesso', "Série '{$serie->nome}' adicionada com sucesso");
     }
 
-    public function destroy(Serie $series)
+    public function destroy(Series $series)
     {
         $series->delete();
 
@@ -63,12 +44,12 @@ class SeriesController extends Controller
             ->with('mensagem.sucesso', "Série '{$series->nome}' removida com sucesso");
     }
 
-    public function edit(Serie $series)
+    public function edit(Series $series)
     {
         return view('series.edit')->with('serie', $series);
     }
 
-    public function update(Serie $series, SeriesFormRequest $request)
+    public function update(Series $series, SeriesFormRequest $request)
     {
         $series->fill($request->all());
         $series->save();
