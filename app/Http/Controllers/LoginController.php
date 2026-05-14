@@ -21,4 +21,9 @@ class LoginController extends Controller
             return redirect()->back()->withErrors(['Usuário ou senha incorretos']);
         }
     }
+
+    public function destroy() {
+        Auth::logout();
+        return to_route('login');
+    }
 }

@@ -1,15 +1,21 @@
 <?php
 
+require __DIR__ . '/auth.php';
 
-use App\Http\Controllers\UsersController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
+use App\Http\Middleware\Autenticador;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\ConfirmablePasswordController;
+use App\Http\Controllers\Auth\EmailVerificationNotificationController;
+use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\EpisodesController;
 use App\Http\Controllers\SeasonsController;
 use App\Http\Controllers\SeriesController;
-use App\Http\Controllers\EpisodesController;
-use App\Http\Controllers\LoginController;
-use App\Http\Middleware\Autenticador;
-use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,23 +29,31 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return redirect('/login');
-})->middleware(Autenticador::class);
+    return view('welcome');
+});
 
-Route::resource('/series', SeriesController::class)
-    ->except(['show']);
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
-Route::get('/series/{series}/seasons', [SeasonsController::class, 'index']) ->name('seasons.index');
+require __DIR__ . '/auth.php';
 
-Route::get('/seasons/{season}/episodes', [EpisodesController::class, 'index'])
-    ->name('episodes.index');
 
-Route::post('/seasons/{season}/episodes', [EpisodesController::class, 'update'])
-    ->name('episodes.update');
+Route::middleware([Autenticador::class])->group(function () {
+    
+    // Rota principal de séries (index, create, store, edit, update, destroy)
+    Route::resource('/series', SeriesController::class)->except(['show']);
 
-Route::get('/login', [LoginController::class, 'index'])->name('login.index');
+    // Rotas de Temporadas
+    Route::get('/series/{series}/seasons', [SeasonsController::class, 'index'])->name('seasons.index');
 
-Route::post('/login', [LoginController::class, 'store'])->name('signin.index');
+    // Rotas de Episódios
+    Route::get('/seasons/{season}/episodes', [EpisodesController::class, 'index'])->name('episodes.index');
+    Route::post('/seasons/{season}/episodes', [EpisodesController::class, 'update'])->name('episodes.update');
+});
 
-Route::get('/register', [UsersController::class, 'create'])->name('users.create');
-Route::post('/register', [UsersController::class, 'store'])->name('users.store');
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});

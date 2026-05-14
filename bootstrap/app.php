@@ -12,8 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     // SE ESTIVER AQUI: remova todo o bloco ->withProviders([...])
     ->withMiddleware(function (Middleware $middleware) {
-        //
-    })
+    $middleware->alias([
+        // O caminho DEVE ser App\Http\Middleware e não App\Http\Controllers
+        'autenticador' => \App\Http\Middleware\Autenticador::class,
+    ]);
+})
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

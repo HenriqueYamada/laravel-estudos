@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 class SeriesController extends Controller
 {
     public function __construct(private SeriesRepository $repository) {
-
+        
     }
 
     public function index(Request $request)
