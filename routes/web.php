@@ -6,6 +6,13 @@ use App\Http\Middleware\Autenticador;
 use App\Http\Controllers\SeriesController;
 use App\Http\Controllers\SeasonsController;
 use App\Http\Controllers\EpisodesController;
+use App\Mail\SeriesCreated;
+use App\Models\User;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\UsersController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 
 // 1. Rota Inicial
@@ -35,4 +42,13 @@ Route::middleware([Autenticador::class])->group(function () {
     Route::get('/series/{series}/seasons', [SeasonsController::class, 'index'])->name('seasons.index');
     Route::get('/seasons/{season}/episodes', [EpisodesController::class, 'index'])->name('episodes.index');
     Route::post('/seasons/{season}/episodes', [EpisodesController::class, 'update'])->name('episodes.update');
+});
+
+Route::get('/email', function() {
+    return new SeriesCreated(
+        'Série de teste',
+        19,
+        5,
+        10,
+    );
 });
