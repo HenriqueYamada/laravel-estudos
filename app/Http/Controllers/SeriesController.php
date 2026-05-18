@@ -36,14 +36,15 @@ class SeriesController extends Controller
         $serie = $this->repository->add($request);
 
         $userList = User::all();
+        $email = new SeriesCreated(
+            $serie->nome,
+            $serie->id,
+            (int) $request->seasonsQty,          
+            (int) $request->episodesPerSeason   // <-- Certifique-se de que está escrito exatamente assim
+        );
+
         foreach($userList as $user) {
-            $email = new SeriesCreated(
-                $serie->nome,
-                $serie->id,
-                (int) $request->seasonsQty,          
-                (int) $request->episodesPerSeason   // <-- Certifique-se de que está escrito exatamente assim
-            );
-            Mail::to($user)->send($email);
+            Mail::to($user)->queue($email); // quando chamado o método queue, ele olha qual sistema de filas está sendo utilizado (database). Depois, ele pega a tarefa mail e armazena na tabela
             sleep(2); //setTimeOut
         }
 
