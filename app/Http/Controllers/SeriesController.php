@@ -19,6 +19,7 @@ class SeriesController extends Controller
 
     public function index(Request $request)
     {
+
         $series = Series::all();
         $mensagemSucesso = session('mensagem.sucesso');
 
@@ -32,29 +33,37 @@ class SeriesController extends Controller
     }
 
     public function store(SeriesFormRequest $request)
-    {
-        $serie = $this->repository->add($request);
+{
+    // 1. Captura o arquivo usando o nome correto do HTML ('cover')
+    $coverPath = $request->file('cover')->store('series_cover', 'public');
+    
+    // 2. Injeta o caminho gerado para dentro do objeto $request
+    $request->coverPath = $coverPath;
+    
+    // 3. Salva no banco de dados através do repositório
+    $serie = $this->repository->add($request);
 
-        $userList = User::all();
-        $email = new SeriesCreated(
-            $serie->nome,
-            $serie->id,
-            (int) $request->seasonsQty,          
-            (int) $request->episodesPerSeason   // <-- Certifique-se de que está escrito exatamente assim
-        );
+    // O restante do seu código continua igual...
+    \App\Events\SeriesCreated::dispatch(
+        $serie->nome,
+        $serie->id,
+        $request->seasonsQty,
+        $request->episodesPerSeason,
+    );
 
-        foreach($userList as $user) {
-            Mail::to($user)->queue($email); // quando chamado o método queue, ele olha qual sistema de filas está sendo utilizado (database). Depois, ele pega a tarefa mail e armazena na tabela
-            sleep(2); //setTimeOut
-        }
-
-
-        return to_route('series.index')
-            ->with('mensagem.sucesso', "Série '{$serie->nome}' adicionada com sucesso");
-    }
+    return to_route('series.index')
+        ->with('mensagem.sucesso', "Série '{$serie->nome}' adicionada com sucesso");
+}
 
     public function destroy(Series $series)
     {
+        // 1. Mandamos o Job deletar o arquivo ANTES de apagar a série do banco, 
+        // usando o nome correto da propriedade (cover_path)
+        if ($series->cover_path) {
+            \App\Jobs\DeleteSeriesCover::dispatch($series->cover_path);
+        }
+
+        // 2. Agora sim, com a imagem despachada para exclusão, apagamos o registro
         $series->delete();
 
         return to_route('series.index')
