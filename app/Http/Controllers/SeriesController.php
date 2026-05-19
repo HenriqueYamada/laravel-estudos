@@ -35,7 +35,9 @@ class SeriesController extends Controller
     public function store(SeriesFormRequest $request)
 {
     // 1. Captura o arquivo usando o nome correto do HTML ('cover')
-    $coverPath = $request->file('cover')->store('series_cover', 'public');
+    $coverPath = $request->file('cover')
+        ? $request->file('cover')->store('series_cover', 'public')
+        : null;
     
     // 2. Injeta o caminho gerado para dentro do objeto $request
     $request->coverPath = $coverPath;
