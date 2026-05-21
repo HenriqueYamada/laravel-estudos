@@ -1,13 +1,14 @@
 <?php
 
-use App\Mail\SeriesCreated;
-use App\Http\Requests\SeriesFormRequest;
-use App\Models\Series;
-use App\Models\User;
-use App\Repositories\SeriesRepository;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+namespace App\Http\Controllers\Api;
 
-public function index() {
-    
+use App\Http\Controllers\Controller;
+use App\Models\Series;
+
+class SeriesController extends Controller
+{
+    public function index()
+    {
+        return Series::all();
+    }
 }
